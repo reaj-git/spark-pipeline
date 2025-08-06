@@ -54,7 +54,7 @@ export const profilePasswordSchema = z
 
 export const resetPasswordSchema = z
   .object({
-    currentPassword: z.string().min(6, "Current password is required"),
+    currentPassword: z.string().min(6, "Current password must be at least 6 characters"),
     newPassword: z
       .string()
       .min(6, "New password must be at least 6 characters"),
