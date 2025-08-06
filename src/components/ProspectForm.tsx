@@ -1,14 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Building, FileText } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
+import { User, Mail, Phone, Building, FileText } from "lucide-react";
 
 interface Prospect {
   id: string;
@@ -16,7 +24,7 @@ interface Prospect {
   email: string;
   phone?: string;
   company?: string;
-  pipeline_stage: 'new' | 'in_talks' | 'closed';
+  pipeline_stage: "new" | "in_talks" | "closed";
   notes?: string;
   created_at: string;
 }
@@ -28,16 +36,21 @@ interface ProspectFormProps {
   prospect?: Prospect | null;
 }
 
-export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectFormProps) => {
+export const ProspectForm = ({
+  isOpen,
+  onClose,
+  onSave,
+  prospect,
+}: ProspectFormProps) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  
+
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    company: '',
-    notes: ''
+    full_name: "",
+    email: "",
+    phone: "",
+    company: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -45,17 +58,17 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
       setFormData({
         full_name: prospect.full_name,
         email: prospect.email,
-        phone: prospect.phone || '',
-        company: prospect.company || '',
-        notes: prospect.notes || ''
+        phone: prospect.phone || "",
+        company: prospect.company || "",
+        notes: prospect.notes || "",
       });
     } else {
       setFormData({
-        full_name: '',
-        email: '',
-        phone: '',
-        company: '',
-        notes: ''
+        full_name: "",
+        email: "",
+        phone: "",
+        company: "",
+        notes: "",
       });
     }
   }, [prospect, isOpen]);
@@ -70,31 +83,29 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
       if (prospect) {
         // Update existing prospect
         const { error } = await supabase
-          .from('prospects')
+          .from("prospects")
           .update(formData)
-          .eq('id', prospect.id);
+          .eq("id", prospect.id);
 
         if (error) throw error;
 
         toast({
-          title: 'Prospect updated',
-          description: 'Prospect information has been updated successfully.'
+          title: "Prospect updated",
+          description: "Prospect information has been updated successfully.",
         });
       } else {
         // Create new prospect
-        const { error } = await supabase
-          .from('prospects')
-          .insert({
-            ...formData,
-            user_id: user.id,
-            pipeline_stage: 'new'
-          });
+        const { error } = await supabase.from("prospects").insert({
+          ...formData,
+          user_id: user.id,
+          pipeline_stage: "new",
+        });
 
         if (error) throw error;
 
         toast({
-          title: 'Prospect added',
-          description: 'New prospect has been added to your pipeline.'
+          title: "Prospect added",
+          description: "New prospect has been added to your pipeline.",
         });
       }
 
@@ -102,9 +113,9 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
       onClose();
     } catch (error: any) {
       toast({
-        title: prospect ? 'Error updating prospect' : 'Error adding prospect',
+        title: prospect ? "Error updating prospect" : "Error adding prospect",
         description: error.message,
-        variant: 'destructive'
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -112,7 +123,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -121,7 +132,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            {prospect ? 'Edit Prospect' : 'Add New Prospect'}
+            {prospect ? "Edit Prospect" : "Add New Prospect"}
           </DialogTitle>
         </DialogHeader>
 
@@ -134,7 +145,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
             <Input
               id="full_name"
               value={formData.full_name}
-              onChange={(e) => handleInputChange('full_name', e.target.value)}
+              onChange={(e) => handleInputChange("full_name", e.target.value)}
               placeholder="John Doe"
               required
             />
@@ -149,25 +160,38 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="john@example.com"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="flex items-center gap-2">
-              <Phone className="w-4 h-4" />
-              Phone
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+1 (555) 123-4567"
-            />
-          </div>
+   
+
+<div className="space-y-2">
+  <Label htmlFor="phone" className="flex items-center gap-2">
+    <Phone className="w-4 h-4" />
+    Phone
+  </Label>
+  <div className="react-phone-wrapper">
+    <PhoneInput
+      country={'us'}
+      value={formData.phone}
+      onChange={(value) => handleInputChange('phone', value)}
+      inputProps={{
+        name: 'phone',
+        id: 'phone',
+        required: false,
+        autoComplete: 'off',
+      }}
+      enableSearch
+      containerClass="w-full"
+      inputClass="!w-full !py-2 !pl-12 !pr-3 !text-sm !border !rounded-md"
+      buttonClass="!bg-white !border-r !border-gray-300"
+    />
+  </div>
+</div>
+
 
           <div className="space-y-2">
             <Label htmlFor="company" className="flex items-center gap-2">
@@ -177,7 +201,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
             <Input
               id="company"
               value={formData.company}
-              onChange={(e) => handleInputChange('company', e.target.value)}
+              onChange={(e) => handleInputChange("company", e.target.value)}
               placeholder="Acme Inc."
             />
           </div>
@@ -190,7 +214,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder="Additional notes about this prospect..."
               rows={3}
             />
@@ -201,7 +225,7 @@ export const ProspectForm = ({ isOpen, onClose, onSave, prospect }: ProspectForm
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : (prospect ? 'Update' : 'Add Prospect')}
+              {loading ? "Saving..." : prospect ? "Update" : "Add Prospect"}
             </Button>
           </div>
         </form>

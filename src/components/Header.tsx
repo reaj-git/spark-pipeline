@@ -1,17 +1,23 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { LogOut, BarChart3, Users, Plus, Menu, X } from 'lucide-react';
-import clsx from 'clsx';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { LogOut, BarChart3, Users, Plus, Menu, X } from "lucide-react";
+import clsx from "clsx";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
-  activeTab: 'pipeline' | 'metrics';
-  onTabChange: (tab: 'pipeline' | 'metrics') => void;
+  activeTab: "pipeline" | "metrics";
+  onTabChange: (tab: "pipeline" | "metrics") => void;
   onAddProspect: () => void;
 }
 
-export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) => {
+export const Header = ({
+  activeTab,
+  onTabChange,
+  onAddProspect,
+}: HeaderProps) => {
   const { signOut, user } = useAuth();
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
@@ -38,16 +44,16 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center space-x-4">
             <Button
-              variant={activeTab === 'pipeline' ? 'default' : 'ghost'}
-              onClick={() => onTabChange('pipeline')}
+              variant={activeTab === "pipeline" ? "default" : "ghost"}
+              onClick={() => onTabChange("pipeline")}
               className="flex items-center gap-2"
             >
               <Users className="w-4 h-4" />
               Pipeline
             </Button>
             <Button
-              variant={activeTab === 'metrics' ? 'default' : 'ghost'}
-              onClick={() => onTabChange('metrics')}
+              variant={activeTab === "metrics" ? "default" : "ghost"}
+              onClick={() => onTabChange("metrics")}
               className="flex items-center gap-2"
             >
               <BarChart3 className="w-4 h-4" />
@@ -57,24 +63,27 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
 
           {/* Desktop Right Section */}
           <div className="hidden md:flex items-center space-x-4">
-            {activeTab === 'pipeline' && (
-              <Button onClick={onAddProspect} className="flex items-center gap-2">
+            {activeTab === "pipeline" && (
+              <Button
+                onClick={onAddProspect}
+                className="flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Add Prospect
               </Button>
             )}
             <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => window.location.href = '/profile'}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/profile")}
                 className="flex items-center gap-2"
               >
                 <Users className="w-4 h-4" />
                 Profile
               </Button>
               <span className="text-sm text-muted-foreground">
-                Welcome, {user?.email?.split('@')[0]}
+                Welcome, {user?.email?.split("@")[0]}
               </span>
               <Button variant="outline" size="sm" onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -88,8 +97,8 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
       {/* Mobile Left Drawer */}
       <div
         className={clsx(
-          'fixed inset-y-0 left-0 w-64 bg-white border-r border-border p-4 z-40 transform transition-transform duration-300 ease-in-out shadow-md',
-          isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+          "fixed inset-y-0 left-0 w-64 bg-white border-r border-border p-4 z-40 transform transition-transform duration-300 ease-in-out shadow-md",
+          isDrawerOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Close button */}
@@ -103,9 +112,9 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
         {/* Navigation */}
         <nav className="flex flex-col space-y-2">
           <Button
-            variant={activeTab === 'pipeline' ? 'default' : 'ghost'}
+            variant={activeTab === "pipeline" ? "default" : "ghost"}
             onClick={() => {
-              onTabChange('pipeline');
+              onTabChange("pipeline");
               toggleDrawer();
             }}
             className="flex items-center gap-2 justify-start"
@@ -114,9 +123,9 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
             Pipeline
           </Button>
           <Button
-            variant={activeTab === 'metrics' ? 'default' : 'ghost'}
+            variant={activeTab === "metrics" ? "default" : "ghost"}
             onClick={() => {
-              onTabChange('metrics');
+              onTabChange("metrics");
               toggleDrawer();
             }}
             className="flex items-center gap-2 justify-start"
@@ -125,7 +134,7 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
             Metrics
           </Button>
 
-          {activeTab === 'pipeline' && (
+          {activeTab === "pipeline" && (
             <Button
               onClick={() => {
                 onAddProspect();
@@ -142,14 +151,14 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
         {/* User Section */}
         <div className="mt-6 border-t border-border pt-4 space-y-2">
           <span className="text-sm text-muted-foreground block">
-            Welcome, {user?.email?.split('@')[0]}
+            Welcome, {user?.email?.split("@")[0]}
           </span>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
               toggleDrawer();
-              window.location.href = '/profile';
+              navigate("/profile");
             }}
             className="flex items-center gap-2 w-full justify-start"
           >

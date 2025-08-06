@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Lock, Mail, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
   const [signInData, setSignInData] = useState<SignInFormData>({
     email: '',
@@ -131,7 +133,7 @@ export const AuthForm = () => {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => window.location.href = '/forgot-password'}
+                    onClick={() => navigate('/forgot-password')}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Forgot your password?
