@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { z } from 'zod';
+import { signInSchema, signUpSchema, SignInFormData, SignUpFormData } from '@/lib/validations'; // update path if needed
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,52 +8,64 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Lock, Mail, User } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { signInSchema, signUpSchema, SignInFormData, SignUpFormData } from '@/lib/validations';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
 
-  // const [signInData, setSignInData] = useState({
-  //   email: '',
-  //   password: ''
-  // });
-
-  // const [signUpData, setSignUpData] = useState({
-  //   email: '',
-  //   password: '',
-  //   fullName: ''
-  // });
-
-  // Forms
-  const signInForm = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+  const [signInData, setSignInData] = useState<SignInFormData>({
+    email: '',
+    password: ''
   });
 
-  const signUpForm = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-    },
+  const [signUpData, setSignUpData] = useState<SignUpFormData>({
+    fullName: '',
+    email: '',
+    password: ''
   });
 
-  const handleSignIn = async (data: SignInFormData) => {
+  const [signInErrors, setSignInErrors] = useState<Partial<Record<keyof SignInFormData, string>>>({});
+  const [signUpErrors, setSignUpErrors] = useState<Partial<Record<keyof SignUpFormData, string>>>({});
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-    await signIn(data.email, data.password);
+
+    const result = signInSchema.safeParse(signInData);
+    if (!result.success) {
+      const fieldErrors: any = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof SignInFormData;
+        fieldErrors[field] = err.message;
+      });
+      setSignInErrors(fieldErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    setSignInErrors({});
+    await signIn(signInData.email, signInData.password);
     setIsLoading(false);
   };
 
-  const handleSignUp = async (data: SignUpFormData) => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-    await signUp(data.email, data.password, data.fullName);
+
+    const result = signUpSchema.safeParse(signUpData);
+    if (!result.success) {
+      const fieldErrors: any = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof SignUpFormData;
+        fieldErrors[field] = err.message;
+      });
+      setSignUpErrors(fieldErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    setSignUpErrors({});
+    await signUp(signUpData.email, signUpData.password, signUpData.fullName);
     setIsLoading(false);
   };
 
@@ -75,7 +89,7 @@ export const AuthForm = () => {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
@@ -88,6 +102,9 @@ export const AuthForm = () => {
                     value={signInData.email}
                     onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
                   />
+                  {signInErrors.email && (
+                    <p className="text-sm text-red-500">{signInErrors.email}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -102,13 +119,12 @@ export const AuthForm = () => {
                     value={signInData.password}
                     onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
                   />
+                  {signInErrors.password && (
+                    <p className="text-sm text-red-500">{signInErrors.password}</p>
+                  )}
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
@@ -128,6 +144,9 @@ export const AuthForm = () => {
                     value={signUpData.fullName}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, fullName: e.target.value }))}
                   />
+                  {signUpErrors.fullName && (
+                    <p className="text-sm text-red-500">{signUpErrors.fullName}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -142,6 +161,9 @@ export const AuthForm = () => {
                     value={signUpData.email}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
                   />
+                  {signUpErrors.email && (
+                    <p className="text-sm text-red-500">{signUpErrors.email}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -154,15 +176,14 @@ export const AuthForm = () => {
                     type="password"
                     placeholder="••••••••"
                     value={signUpData.password}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}            
+                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
                   />
+                  {signUpErrors.password && (
+                    <p className="text-sm text-red-500">{signUpErrors.password}</p>
+                  )}
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
