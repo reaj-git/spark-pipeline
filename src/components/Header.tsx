@@ -64,6 +64,15 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
               </Button>
             )}
             <div className="flex items-center space-x-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.location.href = '/profile'}
+                className="flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Profile
+              </Button>
               <span className="text-sm text-muted-foreground">
                 Welcome, {user?.email?.split('@')[0]}
               </span>
@@ -135,6 +144,18 @@ export const Header = ({ activeTab, onTabChange, onAddProspect }: HeaderProps) =
           <span className="text-sm text-muted-foreground block">
             Welcome, {user?.email?.split('@')[0]}
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              toggleDrawer();
+              window.location.href = '/profile';
+            }}
+            className="flex items-center gap-2 w-full justify-start"
+          >
+            <Users className="w-4 h-4" />
+            Profile
+          </Button>
           <Button
             variant="outline"
             size="sm"
