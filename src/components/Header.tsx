@@ -25,12 +25,12 @@ export const Header = ({
   return (
     <header className="bg-card border-b border-border shadow-sm relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Hamburger + Logo */}
+        <div className="flex flex-wrap justify-between items-center h-16 gap-y-2">
+          {/* Left Section: Logo + Hamburger */}
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleDrawer}
-              className="md:hidden p-2 rounded-md hover:bg-muted"
+              className="lg:hidden p-2 rounded-md hover:bg-muted"
               aria-label="Toggle Menu"
             >
               <Menu className="w-5 h-5" />
@@ -41,8 +41,8 @@ export const Header = ({
             </h1>
           </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-4">
+          {/* Desktop Nav (Only on lg+) */}
+          <nav className="hidden lg:flex items-center space-x-4">
             <Button
               variant={activeTab === "pipeline" ? "default" : "ghost"}
               onClick={() => onTabChange("pipeline")}
@@ -94,7 +94,7 @@ export const Header = ({
         </div>
       </div>
 
-      {/* Mobile Left Drawer */}
+      {/* Mobile/Tablet Drawer */}
       <div
         className={clsx(
           "fixed inset-y-0 left-0 w-64 bg-white border-r border-border p-4 z-40 transform transition-transform duration-300 ease-in-out shadow-md",
@@ -180,10 +180,10 @@ export const Header = ({
         </div>
       </div>
 
-      {/* Overlay behind drawer */}
+      {/* Overlay */}
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-30 z-30 lg:hidden"
           onClick={toggleDrawer}
         />
       )}
