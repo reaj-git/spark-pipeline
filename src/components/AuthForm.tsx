@@ -6,35 +6,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Lock, Mail, User } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signInSchema, signUpSchema, SignInFormData, SignUpFormData } from '@/lib/validations';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
 
-  const [signInData, setSignInData] = useState({
-    email: '',
-    password: ''
+  // const [signInData, setSignInData] = useState({
+  //   email: '',
+  //   password: ''
+  // });
+
+  // const [signUpData, setSignUpData] = useState({
+  //   email: '',
+  //   password: '',
+  //   fullName: ''
+  // });
+
+  // Forms
+  const signInForm = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
-  const [signUpData, setSignUpData] = useState({
-    email: '',
-    password: '',
-    fullName: ''
+  const signUpForm = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+    },
   });
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignIn = async (data: SignInFormData) => {
     setIsLoading(true);
-    
-    await signIn(signInData.email, signInData.password);
+    await signIn(data.email, data.password);
     setIsLoading(false);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignUp = async (data: SignUpFormData) => {
     setIsLoading(true);
-    
-    await signUp(signUpData.email, signUpData.password, signUpData.fullName);
+    await signUp(data.email, data.password, data.fullName);
     setIsLoading(false);
   };
 
@@ -58,7 +75,7 @@ export const AuthForm = () => {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
@@ -70,7 +87,6 @@ export const AuthForm = () => {
                     placeholder="your@email.com"
                     value={signInData.email}
                     onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
-                    required
                   />
                 </div>
                 
@@ -85,7 +101,6 @@ export const AuthForm = () => {
                     placeholder="••••••••"
                     value={signInData.password}
                     onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
-                    required
                   />
                 </div>
                 
@@ -126,7 +141,6 @@ export const AuthForm = () => {
                     placeholder="your@email.com"
                     value={signUpData.email}
                     onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
-                    required
                   />
                 </div>
                 
@@ -140,8 +154,7 @@ export const AuthForm = () => {
                     type="password"
                     placeholder="••••••••"
                     value={signUpData.password}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
-                    required
+                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}            
                   />
                 </div>
                 
