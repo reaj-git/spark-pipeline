@@ -40,6 +40,24 @@ export const Profile = () => {
 
     setIsLoading(true);
 
+    // If current password is provided, verify it first
+    if (currentPassword) {
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword
+      });
+
+      if (verifyError) {
+        toast({
+          title: "Current password incorrect",
+          description: "Please enter your correct current password.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
