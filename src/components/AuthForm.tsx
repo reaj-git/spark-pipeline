@@ -11,7 +11,9 @@ import { Lock, Mail, User } from 'lucide-react';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const [signInData, setSignInData] = useState<SignInFormData>({
     email: '',
@@ -67,6 +69,21 @@ export const AuthForm = () => {
     setSignUpErrors({});
     await signUp(signUpData.email, signUpData.password, signUpData.fullName);
     setIsLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    if (!resetEmail) {
+      setIsLoading(false);
+      return;
+    }
+
+    await resetPassword(resetEmail);
+    setIsLoading(false);
+    setShowForgotPassword(false);
+    setResetEmail('');
   };
 
   return (
@@ -127,6 +144,16 @@ export const AuthForm = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
+                
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
               </form>
             </TabsContent>
             
@@ -191,6 +218,49 @@ export const AuthForm = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Reset Password</CardTitle>
+              <CardDescription>
+                Enter your email to receive reset instructions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? 'Sending...' : 'Send Reset Link'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetEmail('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
