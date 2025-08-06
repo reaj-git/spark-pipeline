@@ -1,95 +1,98 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
-import { SimpleHeader } from '@/components/SimpleHeader';
-import { Lock, User, Mail } from 'lucide-react';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profilePasswordSchema, ProfilePasswordFormData } from "@/lib/validations";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { SimpleHeader } from "@/components/SimpleHeader";
+import { Lock, User, Mail } from "lucide-react";
 
 export const Profile = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords match.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProfilePasswordFormData>({
+    resolver: zodResolver(profilePasswordSchema),
+  });
 
-    if (newPassword.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handlePasswordChange = async (data: ProfilePasswordFormData) => {
     setIsLoading(true);
 
-    // If current password is provided, verify it first
-    if (currentPassword) {
-      const { error: verifyError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: currentPassword
-      });
-
-      if (verifyError) {
-        toast({
-          title: "Current password incorrect",
-          description: "Please enter your correct current password.",
-          variant: "destructive"
+    try {
+      if (data.currentPassword) {
+        const { error: verifyError } = await supabase.auth.signInWithPassword({
+          email: user?.email || "",
+          password: data.currentPassword,
         });
-        setIsLoading(false);
-        return;
+
+        if (verifyError) {
+          toast({
+            title: "Current password incorrect",
+            description: "Please enter your correct current password.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
       }
-    }
 
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-
-    if (error) {
-      toast({
-        title: "Password change failed",
-        description: error.message,
-        variant: "destructive"
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword,
       });
-    } else {
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated."
-      });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    }
 
-    setIsLoading(false);
+      if (error) {
+        toast({
+          title: "Password change failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password updated",
+          description: "Your password has been successfully updated.",
+        });
+        reset();
+      }
+    } catch (err: any) {
+      toast({
+        title: "Something went wrong",
+        description: err.message || "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <SimpleHeader />
-      
+
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Profile Settings</h1>
-            <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+            <p className="text-muted-foreground mt-2">
+              Manage your account settings and preferences
+            </p>
           </div>
 
           {/* Account Information */}
@@ -99,9 +102,7 @@ export const Profile = () => {
                 <User className="w-5 h-5" />
                 Account Information
               </CardTitle>
-              <CardDescription>
-                Your basic account details
-              </CardDescription>
+              <CardDescription>Your basic account details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -113,7 +114,7 @@ export const Profile = () => {
                   <Input
                     id="email"
                     type="email"
-                    value={user?.email || ''}
+                    value={user?.email || ""}
                     disabled
                     className="bg-muted"
                   />
@@ -122,7 +123,7 @@ export const Profile = () => {
                   <Label htmlFor="user-id">User ID</Label>
                   <Input
                     id="user-id"
-                    value={user?.id || ''}
+                    value={user?.id || ""}
                     disabled
                     className="bg-muted text-xs"
                   />
@@ -132,7 +133,11 @@ export const Profile = () => {
                 <Label htmlFor="created-at">Member Since</Label>
                 <Input
                   id="created-at"
-                  value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}
+                  value={
+                    user?.created_at
+                      ? new Date(user.created_at).toLocaleDateString()
+                      : ""
+                  }
                   disabled
                   className="bg-muted"
                 />
@@ -154,73 +159,67 @@ export const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePasswordChange} className="space-y-4">
+              <form
+                onSubmit={handleSubmit(handlePasswordChange)}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
-                  <Label htmlFor="current-password">Current Password</Label>
+                  <Label htmlFor="currentPassword">Current Password</Label>
                   <Input
-                    id="current-password"
+                    id="currentPassword"
                     type="password"
                     placeholder="••••••••"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    {...register("currentPassword")}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Leave blank if you signed up with social login
-                  </p>
+                  {errors.currentPassword && (
+                    <p className="text-sm text-red-500">
+                      {errors.currentPassword.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="newPassword">New Password</Label>
                   <Input
-                    id="new-password"
+                    id="newPassword"
                     type="password"
                     placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
+                    {...register("newPassword")}
                   />
+                  {errors.newPassword && (
+                    <p className="text-sm text-red-500">
+                      {errors.newPassword.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
                   <Input
-                    id="confirm-new-password"
+                    id="confirmPassword"
                     type="password"
                     placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
+                    {...register("confirmPassword")}
                   />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-red-500">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
-                
-                <Button type="submit" disabled={isLoading || !newPassword || !confirmPassword}>
-                  {isLoading ? 'Updating...' : 'Update Password'}
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? "Updating..." : "Update Password"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           <Separator />
-
-          {/* Account Actions */}
-          <Card className="border-destructive/20">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              <CardDescription>
-                These actions cannot be undone
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Need to delete your account? Contact support for assistance.
-              </p>
-              <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                Contact Support
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

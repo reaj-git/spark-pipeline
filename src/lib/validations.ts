@@ -68,8 +68,46 @@ export const prospectSchema = z.object({
     .optional(),
 });
 
+// forgot passworf validation schema
+export const forgotPasswordSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+});
+
+// profile validation schema
+export const profilePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Password must be at least 6 characters long."),
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters long."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+  // reset password validation schema
+
+  export const resetPasswordSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+
 // Type exports
 export type SignInFormData = z.infer<typeof signInSchema>;
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 export type ProspectFormData = z.infer<typeof prospectSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type ProfilePasswordFormData = z.infer<typeof profilePasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
