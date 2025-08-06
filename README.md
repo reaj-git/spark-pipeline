@@ -199,6 +199,8 @@ The recent changes have successfully addressed the following areas:
    - TypeScript type safety
    - Form validation schemas
    - Route configuration
+   - Fixed phone number by third party library
+   - Fixed to not allow edit functionality when stage is closed
 
 ## Testing Checklist
 
