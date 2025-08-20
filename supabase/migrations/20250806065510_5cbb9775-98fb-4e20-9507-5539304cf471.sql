@@ -1,7 +1,7 @@
 -- Create profiles table for user information
 CREATE TABLE public.profiles (
   id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   full_name TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
@@ -32,8 +32,8 @@ CREATE TABLE public.prospects (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
   full_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
+  email TEXT NOT NULL UNIQUE,
+  phone TEXT UNIQUE,
   company TEXT,
   pipeline_stage TEXT NOT NULL DEFAULT 'new' CHECK (pipeline_stage IN ('new', 'in_talks', 'closed')),
   notes TEXT,
